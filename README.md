@@ -1,6 +1,6 @@
 # Fine-grained Sense-aware Lexical Sophistication Indices Based on the CEFR Levels of Word Senses
 
-This project releases the automatic analysis tool and the resources in the article:
+This project releases the automatic analysis tool proposed in the article:
 
 <em>Anonymous authors. Developing Fine-grained Sense-aware Lexical Sophistication Indices Based on the CEFR Levels of Word Senses. Under Review.</em>
 
