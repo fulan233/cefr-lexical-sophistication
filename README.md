@@ -1,14 +1,20 @@
 # Fine-grained Sense-aware Lexical Sophistication Indices Based on the CEFR Levels of Word Senses
 
+This project releases the automatic analysis tool and the resources in the article:
+
+<em>Anonymous authors. Developing Fine-grained Sense-aware Lexical Sophistication Indices Based on the CEFR Levels of Word Senses. Under Review.</em>
+
+This tool can automatically assign words in a text to different CEFR levels based on their senses used in context, thus more effectively capturing nuanced differences in the degree of sophistication of word senses. On this basis, It further computes 50 fine-grained sense-aware lexical sophistication indices based on the distribution of the CEFR levels of the words in a text.
+
 ## Prerequisites
 **1.python environment of this study**
-*   **Python 3.6.2**
-*   **NLTK 3.2.4**
-*   **numpy 1.19.5**
-*   **pandas 0.20.3**
-*   **pytorch 1.3.1**
-*   **tensorflow 1.10.0**
-*   **bert-serving 1.10.0**
+*   **`Python 3.6.2`**
+*   **`NLTK 3.2.4`**
+*   **`numpy 1.19.5`**
+*   **`pandas 0.20.3`**
+*   **`pytorch 1.3.1`**
+*   **`tensorflow 1.10.0`**
+*   **`bert-serving 1.10.0`**
 
 **2. Download the pre-trained language model**
 
@@ -35,7 +41,9 @@ bert-serving-start \
 ```python
 python tag_text_server.py
 ```
-In this step, we firstly conduct sentence tokenization for each essay, which can be seen in the folder of **`samples`**. After that, we label the sense for each polysemous word sentence by sentence. The sense information is from [EVP Online](https://englishprofile.org/).
+In this step, we firstly conduct sentence tokenization for each essay, which can be seen in the folder of **`samples`**. After that, we label the sense for each polysemous word sentence by sentence. The sense information is from [English Vocabulary Profile (EVP) Online](https://englishprofile.org/). The English Vocabulary Profile offers reliable information about which words (and importantly, which meanings of those words) and phrases are known and used by learners at each level of the Common European Framework (CEF).
+
+
 
 The sense tagging results can be seen in the folder of **`output`**.
 
