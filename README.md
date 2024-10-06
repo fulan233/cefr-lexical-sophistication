@@ -56,6 +56,14 @@ bert-serving-terminate -port 5555
 **Step 4. Compute the sense-aware lexical sophistication indices.**
 
 ```python
-python export_csv.py
+python export_csv.py        # the default setting is LazyA1 mode
+python export_csv.py mode   # you could specify the mode name: AW/CW/Min/LazyA1
 ```
-The result can be seen in **`evp-indices.csv`**.
+
+**Modes**
+- AW: computing the indices based on the sense tagging results of all words.
+- CW: computing the indices based on the sense tagging results of content words only.
+- Min: computing the indices by taking the lowest level of each word.
+- LazyA1: If a word's lowest level in EVP is A1, treat it as an A1-level word. For other words, same to AW setting. 
+
+The result can be seen in **`EVP_indices_mode.csv`**.
