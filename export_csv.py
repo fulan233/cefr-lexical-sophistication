@@ -32,8 +32,6 @@ plus_feature_type = {"A": ['A1', 'A2'],
                      "AboveB2": ['B2', 'C1', 'C2']
                      }
 
-POSTFIX = ["_type_ratio", "_type_root_ratio", "_token_ratio", "_token_root_ratio"]
-
 
 def extract_tag(sequence, lazy_mode=None):
     pure_tag_sequence = []
@@ -59,11 +57,46 @@ def extract_tag(sequence, lazy_mode=None):
 
     return pure_tag_sequence
 
+def extract_type_sequence(sequence,lazy_mode = None):
+    ''''for MA mode type calculation'''
+    typelist = []
+    pure_tag_sequence = []
+    for token in sequence:
+        if "#" in token:
+            word = token.split('-')[0]
+            type = token.split("#")[0]
+            tag = token.split("#")[1]
+            ### for computing modes
+            if lazy_mode == 'LazyA1':
+                if word in ld and ld[word]['min'] == 'A1':
+                    tag = ld[word]['min']
+            elif lazy_mode == 'Rand':
+                if word in ld:
+                    tag = ld[word]['rand']
+            elif lazy_mode == 'Min':
+                if word in ld:
+                    tag = ld[word]['min']
+
+            if type not in typelist:
+                pure_tag_sequence.append(tag)
+                typelist.append(type)
+            else:
+                pure_tag_sequence.append('PLACEHOLDER')
+        elif "_" in token:
+            word, tag = token.split("_")
+            if word not in typelist:
+                pure_tag_sequence.append(tag)
+                typelist.append(word)
+            else:
+                pure_tag_sequence.append('PLACEHOLDER')
+
+    return pure_tag_sequence
+
+
+
 def Is_Content_Token(token):
 
     if "#" in token:
-        # word = token.split('-')[0]
-        # tag = token.split("#")[1]
         pos = token.split('_')[0].split('-')[-1]
         if pos in ['noun', 'verb', 'adjective', 'adverb']: # content words onnly
             return True
@@ -83,13 +116,12 @@ def mean_sophistication_score(tag_sequence: list):
     return total_score
 
 
-def output_csv(path, outfile, tag_mode):
+def output_csv(path, outfile, tag_mode,window_size = 100):
     files = glob.glob(path)
     indices = {}
 
     for file in files:
         filename = os.path.split(file)[-1]
-        feature_dict = {}
         type_sequence = []
         all_sequence = []
 
@@ -110,22 +142,50 @@ def output_csv(path, outfile, tag_mode):
 
         type_pure_tags_sequence = extract_tag(type_sequence, tag_mode)
         amount_pure_tags_sequence = extract_tag(all_sequence, tag_mode)
+        all_word_type_pure_tags_sequence = extract_type_sequence(all_sequence,tag_mode)
 
-        for tag in tags:
-            feature_dict[tag + "_type_ratio"] = round((type_pure_tags_sequence.count(tag) / type_length), 3)
-            feature_dict[tag + "_type_root_ratio"] = round((type_pure_tags_sequence.count(tag) / root_type_length), 3)
-            feature_dict[tag + "_token_ratio"] = round((amount_pure_tags_sequence.count(tag) / amount), 3)
-            feature_dict[tag + "_token_root_ratio"] = round((amount_pure_tags_sequence.count(tag) / root_amount), 3)
+        if window_size <= 0:
+            raise ValueError("Window size error.")
+        elif window_size > len(all_word_type_pure_tags_sequence):
+            print("The sliding window size has been set to greater than the sequence length and has been reset to half of the sequence length.")
+            window_size = int(len(all_word_type_pure_tags_sequence)/2)
 
-        for compound_name, tag_sequence in plus_feature_type.items():
-            for post in POSTFIX:
-                feature_dict[compound_name + post] = round(sum([feature_dict[k + post] for k in tag_sequence]), 3)
+        temp_feature_dict = {}
 
-        feature_dict['token_mean_score'] = round(mean_sophistication_score(amount_pure_tags_sequence) / amount, 3)
-        feature_dict['type_mean_score'] = round(mean_sophistication_score(type_pure_tags_sequence) / type_length, 3)
+        for i in range(len(all_word_type_pure_tags_sequence) - window_size + 1):
 
-        # update the EVP indices
-        indices[filename] = feature_dict
+            window = all_word_type_pure_tags_sequence[i:i + window_size]
+            window_type_amount = len([item for item in all_word_type_pure_tags_sequence if item != 'PLACEHOLDER'])
+
+            for tag in tags:
+                if "MA_" + tag + "_type" not in temp_feature_dict.keys():
+                    temp_feature_dict["MA_" + tag + "_type"] = [round((window.count(tag) / window_type_amount),3)]
+                else:
+                    temp_feature_dict["MA_" + tag + "_type"].append(round((window.count(tag) / window_type_amount),3))
+
+            for compound_name, tag_sequence in plus_feature_type.items():
+                if "MA_" + compound_name + "_type" not in temp_feature_dict.keys():
+                    temp_feature_dict["MA_" + compound_name + "_type"] = [sum([temp_feature_dict["MA_" + k + "_type"][i] for k in tag_sequence])]
+                else:
+                    temp_feature_dict["MA_" + compound_name + "_type"].append(sum([temp_feature_dict["MA_" + k + "_type"][i] for k in tag_sequence]))
+
+        for i in range(len(amount_pure_tags_sequence) - window_size + 1):
+            window = amount_pure_tags_sequence[i:i + window_size]
+            for tag in tags:
+                if "MA_" + tag + "_token" not in temp_feature_dict.keys():
+                    temp_feature_dict["MA_" + tag + "_token"] = [window.count(tag)/window_size]
+                else:
+                    temp_feature_dict["MA_" + tag + "_token"].append(window.count(tag)/window_size)
+
+            for compound_name, tag_sequence in plus_feature_type.items():
+                if "MA_" + compound_name + "_token" not in temp_feature_dict.keys():
+                    temp_feature_dict["MA_" + compound_name + "_token"] = [sum([temp_feature_dict["MA_" + k + "_token"][i] for k in tag_sequence])]
+                else:
+                    temp_feature_dict["MA_" + compound_name + "_token"].append(sum([temp_feature_dict["MA_" + k + "_token"][i] for k in tag_sequence]))
+
+        indices[filename] = {k: round(sum(v) / len(v), 3) for k, v in temp_feature_dict.items()}
+        indices[filename]['token_mean_score'] = round(mean_sophistication_score(amount_pure_tags_sequence) / amount,3)
+        indices[filename]['type_mean_score'] = round(mean_sophistication_score(type_pure_tags_sequence) / type_length, 3)
 
     # export the results to a csv file
     df_results = pd.DataFrame.from_dict(indices, orient='index')
@@ -133,11 +193,22 @@ def output_csv(path, outfile, tag_mode):
     df_results.to_csv(outfile)
 
 
+
+
 if __name__ == '__main__':
     tag_mode = 'LazyA1'  # Default setting
+    window_size = 100 # Default setting
     if len(sys.argv) > 1:
         tag_mode = sys.argv[1]
-        if tag_mode not in ['AW', 'CW', 'Min', 'LazyA1']:
+        if tag_mode not in ['AW', 'CW', 'Min', 'LazyA1','Rand']:
             print(f'Mode [{tag_mode}] not supported, Please use: AW/CW/Min/LazyA1...')
             exit()
-    output_csv('./output/*.txt', f'EVP_indices_{tag_mode}.csv', tag_mode)
+
+        if len(sys.argv) > 2:
+            window_size = int(sys.argv[2])
+
+
+
+    print(f'Tag mode: {tag_mode}, Window size: {window_size}')
+    output_csv('./output/*.txt', f'EVP_indices.csv',tag_mode = tag_mode, window_size = window_size)
+
