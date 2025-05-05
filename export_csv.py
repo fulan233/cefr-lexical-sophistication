@@ -210,5 +210,5 @@ if __name__ == '__main__':
 
 
     print(f'Tag mode: {tag_mode}, Window size: {window_size}')
-    output_csv('./output/*.txt', f'EVP_indices.csv',tag_mode = tag_mode, window_size = window_size)
+    output_csv('./output/*.txt', f'EVP_indices_{tag_mode}.csv',tag_mode = tag_mode, window_size = window_size)
 
