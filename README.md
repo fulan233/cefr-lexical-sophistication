@@ -67,4 +67,8 @@ python export_csv.py mode window_size # you could specify the moving average win
 - Min: computing the indices by taking the lowest level of each word.
 - LazyA1: If a word's lowest level in EVP is A1, treat it as an A1-level word. For other words, same to AW setting. 
 
+**Window Size**
+The Moving Average EVP indices calculation process involves moving a sliding window of n tokens along the text, starting from the first token and advancing by one token at a time. For each window, the ratio of X level tokens or sense types is calculated, and the mean is subsequently computed. you could specify the sliding window size.
+
+
 The result can be seen in **`EVP_indices_mode.csv`**.
