@@ -56,8 +56,9 @@ bert-serving-terminate -port 5555
 **Step 4. Compute the sense-aware lexical sophistication indices.**
 
 ```python
-python export_csv.py        # the default setting is LazyA1 mode
-python export_csv.py mode   # you could specify the mode name: AW/CW/Min/LazyA1
+python export_csv.py        # the default setting is LazyA1 mode, the default window size is 100.
+python export_csv.py mode   # you could specify the mode name: AW/CW/Min/LazyA1.
+python export_csv.py mode window_size # you could specify the moving average window size.
 ```
 
 **Modes**
