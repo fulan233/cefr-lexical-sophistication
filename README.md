@@ -2,9 +2,11 @@
 
 This project releases the automatic analysis tool proposed in the article:
 
-<em>Anonymous authors. Developing Fine-grained Sense-aware Lexical Sophistication Indices Based on the CEFR Levels of Word Senses. Under Review.</em>
+<em>Hu N, Lu X, Hu R. Developing fine-grained sense-aware lexical sophistication indices based on the CEFR levels of word senses[J]. Behavior Research Methods, 2025, 57(8): 226.</em>
 
 This tool can automatically assign words in a text to different CEFR levels based on their senses used in context, thus more effectively capturing nuanced differences in the degree of sophistication of word senses. On this basis, It further computes 50 fine-grained sense-aware lexical sophistication indices based on the distribution of the CEFR levels of the words in a text.
+
+<em>acknowledgments: The authors would like to thank the anonymous reviewers for their constructive comments and suggestions on this tool and the article.</em>
 
 ## Prerequisites
 **1.python environment of this study**
